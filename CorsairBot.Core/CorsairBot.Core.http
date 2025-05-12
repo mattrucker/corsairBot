@@ -1,0 +1,6 @@
+@CorsairBot.Core_HostAddress = http://localhost:5048
+
+GET {{CorsairBot.Core_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
