@@ -14,25 +14,37 @@ FROM build AS publish
 RUN dotnet publish "CorsairBot.Core.csproj" -c Release -o /app/publish
 
 FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
 
-# Install Chrome and ChromeDriver
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
+ENV APP_USER=appuser
+RUN addgroup --system ${APP_USER} && adduser --system --ingroup ${APP_USER} ${APP_USER}
+
+ENV CHROME_VERSION="121.0.6167.85-1"
+ENV CHROME_DRIVER_VERSION="121.0.6167.85"
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget \
+        gnupg \
+        ca-certificates \
+        unzip \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
     && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y google-chrome-stable=${CHROME_VERSION} \
+    && wget -q "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip" -P /tmp \
+    && unzip /tmp/chromedriver-linux64.zip -d /tmp \
+    && mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
+    && chmod +x /usr/local/bin/chromedriver \
+    && apt-get install -y --no-install-recommends wireguard \
+    && rm -rf /var/lib/apt/lists/* /tmp/*
 
-# Install WireGuard
-RUN apt-get update && apt-get install -y \
-    wireguard \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=publish /app/publish .
 
-# Create mount points
+# Create mount points (should already exist if WORKDIR /app is effective from base, but explicit is fine)
 RUN mkdir -p /config /data
+RUN chown -R ${APP_USER}:${APP_USER} /app /data /config
+
+USER ${APP_USER}
 
 ENTRYPOINT ["dotnet", "CorsairBot.Core.dll"] 
