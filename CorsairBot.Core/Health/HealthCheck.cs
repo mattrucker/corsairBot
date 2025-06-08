@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using CorsairBot.Core.Services;
 
 namespace CorsairBot.Core.Health;
 

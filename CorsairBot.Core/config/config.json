@@ -1,0 +1,39 @@
+{
+  "region": "us",
+  "corsair_account": {
+    "username": "reruns.2umber@icloud.com",
+    "password": "yYydjc#^4AWBWztY"
+  },
+  "payment_details": {
+    "card_number": "0000000000000000",
+    "expiry_date": "01/99",
+    "cvv": "123",
+    "name_on_card": "Test User"
+  },
+  "shipping_address": {
+    "first_name": "Test",
+    "last_name": "User",
+    "address_line_1": "123 Main St",
+    "city": "Anytown",
+    "state_province": "CA",
+    "zip_postal_code": "90210",
+    "country_code": "US",
+    "phone_number": "5551234567"
+  },
+  "skus_to_monitor": [
+    {
+      "sku_id": "CH-9127X01-NA",
+      "name": "K95 RGB PLATINUM XT",
+      "target_quantity": 1
+    }
+  ],
+  "global_polling_interval_seconds": 300,
+  "minimum_action_delay_seconds": 10,
+  "retry_settings": {
+    "max_retry_attempts": 3,
+    "initial_backoff_seconds": 1,
+    "max_backoff_seconds": 60,
+    "backoff_multiplier": 2.0
+  },
+  "logging_level": "INFO"
+}
