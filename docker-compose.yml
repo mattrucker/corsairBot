@@ -1,5 +1,14 @@
 version: '3.8'
 
+# For local development, create a .env file in the same directory as this docker-compose.yml
+# to define the environment variables used below.
+# Example .env file content:
+# CORSAIR_ACCOUNT_USERNAME=myusername
+# CORSAIR_ACCOUNT_PASSWORD=mypassword
+# PAYMENT_CARD_NUMBER=1234567812345678
+# ... etc.
+# Ensure .env is added to .gitignore to prevent committing secrets.
+
 services:
   corsairbot:
     build:
@@ -8,11 +17,48 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./config:/config
-      - ./data:/data
+      - ./config:/config # For config.json, potentially for SkusToMonitor or non-sensitive fallbacks
+      - ./data:/data     # For persistent data like logs or databases, if any
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
+      # - ConfigPath=/config/config.json # Optional: Overrides default /config/config.json in ConfigurationService
+
+      # Corsair Account (Secrets - provide via .env file or deployment environment)
+      - CORSAIR_ACCOUNT_USERNAME=${CORSAIR_ACCOUNT_USERNAME:-your_corsair_username}
+      - CORSAIR_ACCOUNT_PASSWORD=${CORSAIR_ACCOUNT_PASSWORD:-your_corsair_password}
+
+      # Payment Details (Secrets - provide via .env file or deployment environment)
+      - PAYMENT_CARD_NUMBER=${PAYMENT_CARD_NUMBER:-your_card_number}
+      - PAYMENT_EXPIRY_DATE=${PAYMENT_EXPIRY_DATE:-MM/YY}
+      - PAYMENT_CVV=${PAYMENT_CVV:-your_cvv}
+      - PAYMENT_NAME_ON_CARD=${PAYMENT_NAME_ON_CARD:-Your Name on Card}
+
+      # Shipping Address (Can be secrets or just configuration)
+      - SHIPPING_FIRST_NAME=${SHIPPING_FIRST_NAME:-DefaultFirstName}
+      - SHIPPING_LAST_NAME=${SHIPPING_LAST_NAME:-DefaultLastName}
+      - SHIPPING_STREET_ADDRESS_1=${SHIPPING_STREET_ADDRESS_1:-DefaultAddress1}
+      - SHIPPING_STREET_ADDRESS_2=${SHIPPING_STREET_ADDRESS_2:-} # Optional
+      - SHIPPING_CITY=${SHIPPING_CITY:-DefaultCity}
+      - SHIPPING_STATE_OR_PROVINCE=${SHIPPING_STATE_OR_PROVINCE:-DefaultState}
+      - SHIPPING_POSTAL_CODE=${SHIPPING_POSTAL_CODE:-DefaultZip}
+      - SHIPPING_COUNTRY=${SHIPPING_COUNTRY:-US}
+      - SHIPPING_PHONE_NUMBER=${SHIPPING_PHONE_NUMBER:-DefaultPhone}
+
+      # Bot Settings
+      - REGION=${REGION:-us}
+      - GLOBAL_POLLING_INTERVAL_SECONDS=${GLOBAL_POLLING_INTERVAL_SECONDS:-300}
+      - LOGGING_LEVEL=${LOGGING_LEVEL:-Information} # Options: Trace, Debug, Information, Warning, Error, Critical, None
+      - MINIMUM_ACTION_DELAY_SECONDS=${MINIMUM_ACTION_DELAY_SECONDS:-10}
+
+      # Retry Settings
+      - RETRY_MAX_ATTEMPTS=${RETRY_MAX_ATTEMPTS:-3}
+      - RETRY_INITIAL_BACKOFF_SECONDS=${RETRY_INITIAL_BACKOFF_SECONDS:-5}
+      - RETRY_MAX_BACKOFF_SECONDS=${RETRY_MAX_BACKOFF_SECONDS:-60}
+      - RETRY_BACKOFF_MULTIPLIER=${RETRY_BACKOFF_MULTIPLIER:-2.0}
+
+      # WebDriver Settings (Optional)
+      - WEBDRIVER_USER_AGENT=${WEBDRIVER_USER_AGENT:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
